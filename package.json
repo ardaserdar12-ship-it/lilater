@@ -1,0 +1,22 @@
+{
+  "name": "lilater",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "index.html"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "openai": "^4.28.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "electron": "^41.2.0"
+  }
+}
