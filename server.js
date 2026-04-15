@@ -35,6 +35,32 @@ io.on('connection', (socket) => {
     console.log('Lilater: Yayına hazır bağlantı kuruldu. ID:', socket.id);
 
     socket.on('translate-this', async (data) => {
+      
+        // server.js içindeki socket.on('translate-this', ...) altına ekle:
+
+socket.on('summarize-this', async (data) => {
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { 
+                    role: "system", 
+                    content: "Sen bir asistansın. Verilen konuşma geçmişine bakarak, şu an hangi konudan bahsedildiğini çok kısa (en fazla 10 kelime) ve profesyonel bir şekilde özetle." 
+                },
+                { role: "user", content: "Konuşma geçmişi: " + data.fullText }
+            ],
+            temperature: 0.5,
+        });
+
+        socket.emit('display-summary', {
+            summary: response.choices[0].message.content
+        });
+    } catch (e) {
+        console.error("Özetleme Hatası:", e.message);
+    }
+});
+        
+        
         if (!data.text || data.text.length < 3) return;
 
         try {
