@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lilater | AI Real-time Translation</title>
+    <title>Lilater | Premium Real-time AI Translation</title>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #05070a;
+            --bg: #020408; /* Derin Siyah Arka Plan */
             --primary: #6366f1;
-            --primary-soft: rgba(99, 102, 241, 0.1);
+            --primary-soft: rgba(99, 102, 241, 0.15);
             --accent: #a855f7;
             --text-main: #ffffff;
             --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.08);
-            --glass: rgba(17, 24, 39, 0.7);
+            --glass: rgba(10, 15, 25, 0.8);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,114 +24,127 @@
             color: var(--text-main); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             overflow-x: hidden;
-            background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+            /* Arka plan parıltı efektleri */
+            background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
         }
 
+        /* Navigasyon Mantığı */
         .section { display: none; min-height: 100vh; width: 100%; transition: opacity 0.5s ease; position: relative; }
         .section.active { display: flex; flex-direction: column; animation: fadeIn 0.6s forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- NAVIGATION --- */
+        /* --- LANDING --- */
         nav { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 30px 20px; z-index: 100; }
-        .logo { font-weight: 800; font-size: 1.8rem; letter-spacing: -1.5px; cursor: pointer; }
-        .nav-links { display: flex; gap: 35px; }
-        .nav-links a { color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.3s; }
+        .logo { font-weight: 800; font-size: 1.8rem; letter-spacing: -1.5px; cursor: pointer; color: #fff; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
         .nav-links a:hover { color: var(--primary); }
 
-        /* --- HERO --- */
-        .hero { text-align: center; margin-top: 100px; padding: 0 20px; width: 100%; }
-        .hero-title { font-size: 5.5rem; font-weight: 800; letter-spacing: -4px; line-height: 1.1; margin-bottom: 25px; background: linear-gradient(to bottom, #fff 60%, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-desc { color: var(--text-dim); font-size: 1.3rem; max-width: 650px; margin: 0 auto 45px auto; line-height: 1.6; }
+        .hero { text-align: center; margin-top: 80px; padding: 0 20px; z-index: 10; }
+        .hero-title { font-size: 5.5rem; font-weight: 800; letter-spacing: -4px; line-height: 1; margin-bottom: 25px; background: linear-gradient(to bottom, #fff 60%, #475569); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-desc { color: var(--text-dim); font-size: 1.3rem; max-width: 650px; margin: 0 auto 40px auto; line-height: 1.6; }
 
-        /* --- BUTTONS --- */
+        /* --- BUTONLAR --- */
         .btn { padding: 16px 32px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); }
+        .btn-primary:hover { transform: translateY(-3px); }
         .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
         .btn-outline:hover { background: rgba(255,255,255,0.05); }
 
-        /* --- PRICING & FEATURES GRID --- */
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; max-width: 1200px; margin: 80px auto; width: 90%; }
-        .card { background: var(--glass); padding: 40px; border-radius: 28px; border: 1px solid var(--border); backdrop-filter: blur(20px); text-align: left; }
-        .card.featured { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
-        .card h3 { color: var(--primary); font-size: 1.2rem; margin-bottom: 15px; }
-        .card p { color: var(--text-dim); line-height: 1.6; }
-
-        /* --- SETUP CARD --- */
-        .setup-box { background: var(--glass); padding: 50px; border-radius: 40px; border: 1px solid var(--border); width: 100%; max-width: 480px; margin: auto; backdrop-filter: blur(30px); text-align: center; }
-        select { width: 100%; padding: 18px; background: rgba(0,0,0,0.3); color: #fff; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 15px; font-size: 1rem; outline: none; }
+        /* --- SES DALGASI (VISUALIZER) --- */
+        .visualizer { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 25px; height: 40px; }
+        .visualizer .bar { width: 4px; height: 8px; background: var(--primary); border-radius: 10px; transition: 0.15s; opacity: 0.3; }
+        .visualizer.active .bar { opacity: 1; animation: wave 1s infinite ease-in-out; }
+        .visualizer.active .bar:nth-child(1) { animation-delay: 0.1s; }
+        .visualizer.active .bar:nth-child(2) { animation-delay: 0.3s; }
+        .visualizer.active .bar:nth-child(3) { animation-delay: 0.5s; }
+        .visualizer.active .bar:nth-child(4) { animation-delay: 0.2s; }
+        .visualizer.active .bar:nth-child(5) { animation-delay: 0.4s; }
+        @keyframes wave { 0%, 100% { height: 8px; } 50% { height: 40px; } }
 
         /* --- DASHBOARD --- */
         #work-page { flex-direction: row; }
-        .sidebar { width: 300px; background: #080a0f; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 40px; justify-content: space-between; }
+        .sidebar { width: 300px; background: #010204; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 40px; justify-content: space-between; }
         .main-space { flex: 1; display: flex; flex-direction: column; padding: 40px; align-items: center; justify-content: center; }
-        .credit-badge { background: var(--primary-soft); color: var(--primary); padding: 15px; border-radius: 16px; border: 1px solid var(--primary); text-align: center; margin-bottom: 20px; }
-        .main-trans-card { width: 100%; max-width: 900px; background: rgba(10,12,20,0.8); padding: 60px; border-radius: 40px; border: 1px solid var(--border); text-align: center; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
-        #trans-text { font-size: 3rem; font-weight: 800; line-height: 1.2; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        #orig-box { color: var(--text-dim); margin-bottom: 30px; font-size: 1.2rem; }
+        .credit-badge { background: var(--primary-soft); padding: 20px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; }
+        
+        .main-trans-card { width: 100%; max-width: 900px; background: var(--glass); padding: 70px; border-radius: 40px; border: 1px solid var(--border); text-align: center; backdrop-filter: blur(20px); box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
+        #trans-text { font-size: 3rem; font-weight: 800; line-height: 1.1; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #orig-box { color: var(--text-dim); margin-bottom: 20px; font-size: 1.2rem; }
+
+        /* Fiyatlandırma Kartları */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1100px; margin: 50px auto; width: 90%; }
+        .card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); text-align: center; }
+        .card.pro { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); transform: scale(1.05); }
+
+        /* Yüzen Bayraklar */
+        .flag-bg { position: absolute; font-size: 2rem; opacity: 0.08; pointer-events: none; z-index: 1; animation: float 10s infinite alternate; }
+        @keyframes float { from { transform: translate(0,0); } to { transform: translate(20px, 20px); } }
     </style>
 </head>
 <body>
 
-    <nav id="global-nav">
+    <nav id="main-nav">
         <div class="logo" onclick="showSection('home-page')">Lilater<span style="color: var(--primary);">.</span></div>
         <div class="nav-links">
             <a onclick="showSection('features-page')">Özellikler</a>
             <a onclick="showSection('pricing-page')">Fiyatlandırma</a>
         </div>
-        <button class="btn btn-outline" style="padding: 10px 24px; font-size: 0.85rem;" onclick="showSection('setup-page')">Giriş Yap</button>
+        <button class="btn btn-outline" style="padding: 10px 20px; font-size: 0.8rem;" onclick="showSection('setup-page')">Giriş Yap</button>
     </nav>
 
     <section id="home-page" class="section active">
+        <div class="flag-bg" style="top:20%; left:10%;">🇹🇷</div>
+        <div class="flag-bg" style="top:15%; right:15%;">🇺🇸</div>
+        <div class="flag-bg" style="bottom:25%; left:12%;">🇩🇪</div>
         <div class="hero">
-            <div style="background: var(--primary-soft); color: var(--primary); padding: 8px 18px; border-radius: 100px; display: inline-block; font-size: 0.75rem; font-weight: 800; margin-bottom: 25px; border: 1px solid rgba(99, 102, 241, 0.2);">NEXT-GEN SIMULTANEOUS TRANSLATION</div>
-            <h1 class="hero-title">Dili Engel Olmaktan <br> Çıkarın.</h1>
-            <p class="hero-desc">Lilater, milisaniyelik gecikme süresiyle konuşmalarınızı anında 50+ dile çevirerek sınırları ortadan kaldırır.</p>
+            <h1 class="hero-title">Dili Engel Olmaktan Çıkarın.</h1>
+            <p class="hero-desc">Yapay zeka ile canlı konuşmalarınızı anında 50+ dile çevirin. Milisaniyelik gecikme, profesyonel doğruluk.</p>
             <div style="display: flex; gap: 20px; justify-content: center;">
-                <button class="btn btn-primary" onclick="showSection('setup-page')">Hemen Başla</button>
-                <button class="btn btn-outline" onclick="showSection('features-page')">Sistemi İncele</button>
+                <button class="btn btn-primary" onclick="showSection('setup-page')">Ücretsiz Başlayın</button>
+                <button class="btn btn-outline" onclick="showSection('features-page')">Özellikleri Keşfet</button>
             </div>
         </div>
     </section>
 
     <section id="features-page" class="section">
-        <div style="text-align: center; margin-top: 60px;">
-            <h2 style="font-size: 3rem; font-weight: 800;">Güçlü Özellikler</h2>
-            <p style="color: var(--text-dim);">Dünya standartlarında simültane çeviri teknolojisi.</p>
+        <div style="text-align:center; margin-top:80px;">
+            <h2 style="font-size:3rem; margin-bottom:15px;">Neden Lilater?</h2>
+            <p style="color:var(--text-dim)">Teknoloji ve çevirinin mükemmel uyumu.</p>
         </div>
-        <div class="grid-container">
-            <div class="card"><h3>⚡ Ultra Düşük Gecikme</h3><p>200ms tepki süresi ile gerçek zamanlı simültane çeviri deneyimi.</p></div>
-            <div class="card"><h3>🎙️ Kristal Netlik</h3><p>Gelişmiş AI modelleri ile aksan ve gürültü filtreleme teknolojisi.</p></div>
-            <div class="card"><h3>🌍 Global Erişim</h3><p>Tek bir tıklama ile toplantılarınızı tüm dünyaya ana dillerinde ulaştırın.</p></div>
+        <div class="grid">
+            <div class="card"><h3>⚡ Ultra Hız</h3><p>200ms tepki süresi ile simültane deneyimi.</p></div>
+            <div class="card"><h3>🎙️ Ses Kalitesi</h3><p>AI destekli gürültü engelleme ve netleştirme.</p></div>
+            <div class="card"><h3>🖥️ Sistem Sesi</h3><p>Cihazınızdaki her sesi anında yakalayıp çevirebilirsiniz.</p></div>
         </div>
         <button class="btn btn-outline" style="margin: 0 auto;" onclick="showSection('home-page')">← Geri Dön</button>
     </section>
 
     <section id="pricing-page" class="section">
-        <div style="text-align: center; margin-top: 60px;">
-            <h2 style="font-size: 3rem; font-weight: 800;">Şeffaf Fiyatlandırma</h2>
-            <p style="color: var(--text-dim);">İhtiyacınıza en uygun planı seçin.</p>
+        <div style="text-align:center; margin-top:80px;">
+            <h2 style="font-size:3rem; margin-bottom:15px;">Fiyatlandırma</h2>
         </div>
-        <div class="grid-container">
-            <div class="card"><h3>Başlangıç</h3><p>Ayda 60 Dakika<br>Standart Çeviri Hızı<br>Ücretsiz</p></div>
-            <div class="card featured"><h3>Pro</h3><p>Sınırsız Çeviri<br>Öncelikli İşlemci<br>299₺ / Ay</p></div>
-            <div class="card"><h3>Kurumsal</h3><p>API Erişimi<br>Özel Entegrasyonlar<br>Bize Ulaşın</p></div>
+        <div class="grid">
+            <div class="card"><h3>Ücretsiz</h3><p>60 Dakika / Ay</p><button class="btn btn-outline" style="width:100%; margin-top:20px;">Aktif</button></div>
+            <div class="card pro"><h3>Pro</h3><p>Sınırsız Çeviri</p><button class="btn btn-primary" style="width:100%; margin-top:20px;">Satın Al</button></div>
+            <div class="card"><h3>Business</h3><p>API Erişimi</p><button class="btn btn-outline" style="width:100%; margin-top:20px;">İletişim</button></div>
         </div>
         <button class="btn btn-outline" style="margin: 0 auto;" onclick="showSection('home-page')">← Geri Dön</button>
     </section>
 
-    <section id="setup-page" class="section">
-        <div class="setup-box">
-            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 20px;">Başlat</h2>
-            <select id="sL">
-                <option value="tr-TR">Türkçe (Türkiye)</option>
-                <option value="en-US">English (US)</option>
+    <section id="setup-page" class="section" style="justify-content:center; align-items:center;">
+        <div style="background:var(--glass); padding:50px; border-radius:40px; border:1px solid var(--border); width:400px; text-align:center; backdrop-filter:blur(30px);">
+            <h2 style="margin-bottom:30px;">Ayarlar</h2>
+            <select id="sL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:12px; border:1px solid var(--border); margin-bottom:15px;">
+                <option value="tr-TR">Türkçe</option>
+                <option value="en-US">İngilizce</option>
             </select>
-            <select id="tL">
+            <select id="tL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:12px; border:1px solid var(--border); margin-bottom:30px;">
                 <option value="İngilizce">İngilizce'ye Çevir</option>
-                <option value="Almanca">Almanca'ya Çevir</option>
+                <option value="Almanca">Almanca'ye Çevir</option>
             </select>
-            <button class="btn btn-primary" style="width: 100%;" onclick="startEngine()">Çalışma Alanını Aç</button>
+            <button class="btn btn-primary" style="width:100%;" onclick="startEngine()">Başlat</button>
         </div>
     </section>
 
@@ -139,15 +152,19 @@
         <aside class="sidebar">
             <div>
                 <div class="logo">Lilater.</div>
-                <div class="credit-badge">
-                    <small>KALAN KREDİ</small><br>
-                    <span style="font-size: 1.5rem; font-weight: 800;">120 Dakika</span>
-                </div>
+                <button id="sysBtn" class="btn btn-outline" style="width:100%; margin-top:30px; font-size:0.8rem;" onclick="toggleSystemAudio()">🖥️ Sistem Sesi Ekle</button>
             </div>
-            <button class="btn btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2);" onclick="location.reload()">Sistemi Kapat</button>
+            <div class="credit-badge">
+                <small>KALAN KREDİ</small><br>
+                <span style="font-size: 1.5rem; font-weight: 800;">120 Dakika</span>
+            </div>
+            <button class="btn btn-outline" style="color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="location.reload()">Sistemi Kapat</button>
         </aside>
         <main class="main-space">
-            <div id="orig-box">Sessizlik algılandı, dinleniyor...</div>
+            <div id="visualizer" class="visualizer">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <div id="orig-box">Ses motoru hazır, dinleniyor...</div>
             <div class="main-trans-card">
                 <div id="trans-text">Waiting for audio...</div>
             </div>
@@ -158,11 +175,10 @@
         const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
         let recognition;
         let lastTranscript = "";
+        let micStream, screenStream, audioContext, dest, waveTimer;
 
         function showSection(id) {
-            // Dashboard sayfasında navigasyonu gizle
-            document.getElementById('global-nav').style.display = (id === 'work-page') ? 'none' : 'flex';
-            
+            document.getElementById('main-nav').style.display = (id === 'work-page') ? 'none' : 'flex';
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             window.scrollTo(0,0);
@@ -172,38 +188,63 @@
             showSection('work-page');
             const src = document.getElementById('sL').value;
             const target = document.getElementById('tL').value;
-            
             try {
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new Speech();
-                recognition.lang = src;
-                recognition.continuous = true;
-                recognition.interimResults = true;
-
-                recognition.onresult = (e) => {
-                    let transcript = "";
-                    for (let i = e.resultIndex; i < e.results.length; ++i) {
-                        transcript += e.results[i][0].transcript;
-                    }
-                    document.getElementById('orig-box').innerText = transcript;
-
-                    clearTimeout(window.sTimer);
-                    window.sTimer = setTimeout(() => {
-                        if (transcript.length > 5 && transcript !== lastTranscript) {
-                            socket.emit('translate-this', { text: transcript, target: target });
-                            lastTranscript = transcript;
-                        }
-                    }, 800);
-                };
-                recognition.onend = () => { try { recognition.start(); } catch(e) {} };
-                recognition.start();
-            } catch(e) { alert("Mikrofon izni gerekli!"); }
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                initRecognition(src, target);
+            } catch(e) { alert("Mikrofon izni şart!"); location.reload(); }
         }
 
-        socket.on('display-translation', (t) => {
-            document.getElementById('trans-text').innerText = t;
-        });
+        async function toggleSystemAudio() {
+            const btn = document.getElementById('sysBtn');
+            if (!screenStream) {
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    dest = audioContext.createMediaStreamDestination();
+                    const micSource = audioContext.createMediaStreamSource(micStream);
+                    const screenSource = audioContext.createMediaStreamSource(screenStream);
+                    micSource.connect(dest); screenSource.connect(dest);
+                    btn.innerHTML = "✅ Sistem Sesi Aktif"; btn.classList.add('active');
+                } catch(e) { console.error("Sistem sesi iptal."); }
+            } else {
+                screenStream.getTracks().forEach(t => t.stop()); screenStream = null;
+                btn.innerHTML = "🖥️ Sistem Sesi Ekle"; btn.classList.remove('active');
+            }
+        }
+
+        function initRecognition(src, target) {
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new Speech();
+            recognition.lang = src; recognition.continuous = true; recognition.interimResults = true;
+
+            recognition.onresult = (e) => {
+                let transcript = "";
+                for (let i = e.resultIndex; i < e.results.length; ++i) { transcript += e.results[i][0].transcript; }
+                
+                // Senin özel "slice(-12)" mantığınla hızı koruyoruz
+                const words = transcript.trim().split(/\s+/);
+                const focusText = words.slice(-12).join(" ");
+                document.getElementById('orig-box').innerText = focusText;
+
+                // SES DALGASINI TETİKLE
+                const viz = document.getElementById('visualizer');
+                viz.classList.add('active');
+                clearTimeout(waveTimer);
+                waveTimer = setTimeout(() => viz.classList.remove('active'), 800);
+
+                clearTimeout(window.sTimer);
+                window.sTimer = setTimeout(() => {
+                    if (focusText.length > 3 && focusText !== lastTranscript) {
+                        socket.emit('translate-this', { text: focusText, target: target });
+                        lastTranscript = focusText;
+                    }
+                }, 700);
+            };
+            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
+            recognition.start();
+        }
+
+        socket.on('display-translation', (t) => { document.getElementById('trans-text').innerText = t; });
     </script>
 </body>
 </html>
