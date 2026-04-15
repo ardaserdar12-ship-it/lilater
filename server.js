@@ -12,7 +12,7 @@ const io = new Server(httpServer);
 
 // LILATER API ANAHTARI
 const openai = new OpenAI({
-  apiKey: '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' // <--- BURAYA KENDİ TAM ANAHTARINI YAPIŞTIRMAYI UNUTMA
+  apiKey: process.env.OPENAI_API_KEY // Render panelinden gireceğimiz değişken
 });
 
 app.use(express.static('public'));
