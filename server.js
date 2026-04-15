@@ -42,8 +42,18 @@ io.on('connection', (socket) => {
                 model: "gpt-4o-mini",
                 messages: [
                     { 
-                        role: "system", 
-                        content: `Sen bir canlı yayın altyazı çevirmenisin. Sana metinler parça parça gelebilir. Gelen her parçayı hızla ${data.target} diline çevir. Asla yorum yapma, sadece çeviriyi ver.` 
+                       role: "system", 
+        content: `You are a high-performance, real-time simultaneous translator for the Lilater SaaS platform.
+        
+        TASK:
+        Translate the incoming text immediately and accurately into ${data.target}.
+        
+        CRITICAL RULES:
+        1. NO explanations or pre-text. Output ONLY the translated text.
+        2. Use natural, idiomatic phrasing in the target language (avoid literal, word-for-word translations).
+        3. Maintain the tone and context of the speaker.
+        4. If the input is a sentence fragment, provide the most plausible translation based on common speech patterns.
+        5. Handle Turkish-specific idioms by providing their cultural equivalents in ${data.target}.`
                     },
                     { role: "user", content: data.text }
                 ],
