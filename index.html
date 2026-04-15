@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lilater | AI Real-time Translation</title>
+    <title>Lilater | Profesyonel Canlı AI Çeviri Platformu</title>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -13,151 +13,217 @@
             --primary-soft: rgba(99, 102, 241, 0.1);
             --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.06);
+            --glass: rgba(15, 20, 30, 0.6);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background-color: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
 
+        /* Navigasyon Sistemi */
         .section { display: none; min-height: 100vh; width: 100%; transition: opacity 0.5s ease; position: relative; }
         .section.active { display: flex; flex-direction: column; animation: fadeIn 0.6s forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- LANDING --- */
-        #home-page { align-items: center; justify-content: flex-start; padding: 0 20px; }
-        .nav-landing { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; padding: 30px 0; z-index: 100; }
+        /* --- 1. LANDING PAGE --- */
+        #home-page { align-items: center; padding: 0 20px; text-align: center; }
+        .hero-title { font-size: 5rem; font-weight: 800; letter-spacing: -3px; line-height: 1; margin: 100px 0 25px 0; background: linear-gradient(to bottom, #fff 50%, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .hero { text-align: center; margin-top: 120px; position: relative; z-index: 10; width: 100%; }
-        .hero-title { font-size: 5rem; font-weight: 800; letter-spacing: -3px; line-height: 1.1; margin-bottom: 20px; }
-        .gradient-text { background: linear-gradient(180deg, #fff 50%, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* --- ESTETİK BAYRAK YERLEŞİMİ --- */
-        .flag-bg { 
-            position: absolute; 
-            font-size: 1.5rem; 
-            opacity: 0.15; 
-            filter: grayscale(0.5);
-            animation: float 8s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 1;
-        }
-        @keyframes float { 
-            0%, 100% { transform: translateY(0) rotate(0); } 
-            50% { transform: translateY(-30px) rotate(10deg); } 
-        }
+        /* Arka Plan Bayrakları */
+        .flag-bg { position: absolute; opacity: 0.1; font-size: 2rem; pointer-events: none; z-index: -1; animation: float 10s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(15px, -15px); } }
 
-        /* UI Elemanları */
-        .hero-desc { color: var(--text-dim); font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6; }
-        .btn { padding: 16px 32px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
+        /* --- 2. DASHBOARD (ÇALIŞMA ALANI) --- */
+        .dashboard { display: flex; width: 100%; height: 100vh; }
+        .sidebar { width: 280px; background: #080a0f; border-right: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; }
+        .workspace { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a0c14 0%, #030508 100%); padding: 40px; }
+        
+        /* Ortak Elementler */
+        .btn { padding: 14px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 0.9rem; text-decoration: none; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
         .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
+        .btn-audio { background: rgba(255,255,255,0.03); color: var(--text-dim); margin-bottom: 10px; border: 1px solid var(--border); }
+        .btn-audio.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+
+        .main-card { width: 100%; max-width: 900px; background: var(--glass); padding: 60px; border-radius: 30px; border: 1px solid var(--border); text-align: center; backdrop-filter: blur(20px); }
+        #trans-text { font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
+        #orig-box { color: var(--text-dim); margin-bottom: 20px; font-size: 1.1rem; min-height: 1.5rem; }
         
-        /* --- WORKSPACE --- */
-        .main-trans-card { width: 90%; max-width: 1000px; background: rgba(10,12,20,0.9); padding: 50px; border-radius: 30px; border: 1px solid var(--border); text-align: center; margin-top: 50px; }
-        #trans-text { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1.2; }
-        #orig-box { color: var(--text-dim); margin-bottom: 20px; font-size: 1.1rem; }
+        .credit-card { background: var(--primary-soft); padding: 20px; border-radius: 16px; border: 1px solid var(--primary); margin-top: auto; text-align: center; }
     </style>
 </head>
 <body>
 
     <section id="home-page" class="section active">
-        <div class="flag-bg" style="top:15%; left:10%;">🇹🇷</div>
-        <div class="flag-bg" style="top:20%; right:12%; animation-delay: 1s;">🇺🇸</div>
-        <div class="flag-bg" style="bottom:25%; left:15%; animation-delay: 2s;">🇩🇪</div>
-        <div class="flag-bg" style="bottom:20%; right:10%; animation-delay: 3s;">🇯🇵</div>
-        <div class="flag-bg" style="top:40%; left:5%; animation-delay: 4s;">🇫🇷</div>
-        <div class="flag-bg" style="top:60%; right:5%; animation-delay: 5s;">🇬🇧</div>
-
-        <nav class="nav-landing">
-            <div style="font-weight: 800; font-size: 1.8rem;">Lilater<span style="color: var(--primary);">.</span></div>
-            <button class="btn btn-outline" style="padding: 10px 20px;" onclick="showSection('setup-page')">Giriş Yap</button>
+        <div class="flag-bg" style="top:20%; left:10%;">🇹🇷</div>
+        <div class="flag-bg" style="top:15%; right:15%;">🇺🇸</div>
+        <div class="flag-bg" style="bottom:25%; left:20%;">🇩🇪</div>
+        
+        <nav style="width:100%; max-width:1200px; display:flex; justify-content:space-between; padding:40px 0; align-items:center;">
+            <div style="font-weight:800; font-size:1.8rem;">Lilater<span style="color:var(--primary)">.</span></div>
+            <div style="display:flex; gap:15px;">
+                <button class="btn btn-outline" onclick="showSection('pricing-page')">Planlar</button>
+                <button class="btn btn-primary" onclick="showSection('setup-page')">Giriş Yap</button>
+            </div>
         </nav>
 
-        <div class="hero">
-            <div style="background: var(--primary-soft); color: var(--primary); padding: 8px 16px; border-radius: 100px; display: inline-block; font-size: 0.8rem; font-weight: 700; margin-bottom: 20px;">AI REAL-TIME TRANSLATION</div>
-            <h1 class="hero-title gradient-text">Dili Engel Olmaktan <br> Çıkarın.</h1>
-            <p class="hero-desc">Yapay zeka ile canlı yayınlarınızda dili bariyer olmaktan çıkarın, küresel kitleye anında ulaşın.</p>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn btn-primary" onclick="showSection('setup-page')">Ücretsiz Deneyin</button>
-                <button class="btn btn-outline" onclick="alert('Onboarding Yakında!')">Tanıtımı İzle</button>
-            </div>
-        </div>
+        <h1 class="hero-title">Dili Engel Olmaktan <br> Çıkarın.</h1>
+        <p style="color:var(--text-dim); font-size:1.2rem; margin-bottom:40px; line-height:1.6;">AI destekli simültane çeviri ile dünyaya açılın. <br> Profesyonel çeviri kalitesi ve sistem sesi entegrasyonu.</p>
+        <button class="btn btn-primary" onclick="showSection('setup-page')">Ücretsiz Başlayın</button>
     </section>
 
     <section id="setup-page" class="section" style="justify-content:center; align-items:center;">
-        <div style="background: rgba(15,20,30,0.8); padding: 50px; border-radius: 35px; border: 1px solid var(--border); width: 450px; text-align: center;">
-            <h2 style="margin-bottom: 20px;">Ayarlar</h2>
-            <select id="sL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:10px; border:1px solid var(--border); margin-bottom: 10px;">
-                <option value="tr-TR">Türkçe</option>
-                <option value="en-US">İngilizce</option>
+        <div style="background:var(--glass); padding:50px; border-radius:30px; border:1px solid var(--border); width:400px; text-align:center;">
+            <h2 style="margin-bottom:30px;">Bağlantı Ayarları</h2>
+            <label style="display:block; text-align:left; font-size:0.7rem; color:var(--text-dim); margin-bottom:5px;">KAYNAK DİL</label>
+            <select id="sL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:10px; border:1px solid var(--border); margin-bottom:15px;">
+                <option value="tr-TR">Türkçe (Türkiye)</option>
+                <option value="en-US">English (US)</option>
+                <option value="de-DE">Deutsch (Germany)</option>
             </select>
-            <select id="tL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:10px; border:1px solid var(--border); margin-bottom: 20px;">
-                <option value="İngilizce">İngilizce'ye Çevir</option>
-                <option value="Almanca">Almanca'ya Çevir</option>
-                <option value="Fransızca">Fransızca'ya Çevir</option>
+            <label style="display:block; text-align:left; font-size:0.7rem; color:var(--text-dim); margin-bottom:5px;">HEDEF DİL</label>
+            <select id="tL" style="width:100%; padding:15px; background:#000; color:#fff; border-radius:10px; border:1px solid var(--border); margin-bottom:30px;">
+                <option value="İngilizce">İngilizce</option>
+                <option value="Almanca">Almanca</option>
+                <option value="Fransızca">Fransızca</option>
+                <option value="Türkçe">Türkçe</option>
             </select>
-            <button class="btn btn-primary" style="width: 100%;" onclick="startEngine()">Başlat</button>
+            <button class="btn btn-primary" style="width:100%;" onclick="startEngine()">Çalışma Alanını Aç</button>
         </div>
     </section>
 
     <section id="work-page" class="section">
-        <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 800;">Lilater.</div>
-            <button class="btn btn-outline" style="padding: 8px 16px;" onclick="location.reload()">Çıkış</button>
+        <div class="dashboard">
+            <aside class="sidebar">
+                <div style="font-weight:800; font-size:1.5rem; margin-bottom:40px;">Lilater<span style="color:var(--primary)">.</span></div>
+                
+                <button id="sysBtn" class="btn btn-audio" onclick="toggleSystemAudio()">🖥️ Sistem Sesi Ekle</button>
+                
+                <nav style="display:flex; flex-direction:column; gap:10px; margin-top: 20px;">
+                    <a href="#" style="color:white; text-decoration:none; font-weight:600; font-size:0.9rem;">🎙️ Canlı Çeviri</a>
+                    <a href="#" style="color:var(--text-dim); text-decoration:none; font-size:0.9rem;" onclick="showSection('pricing-page')">💳 Paket Yükselt</a>
+                </nav>
+                
+                <div class="credit-card">
+                    <div style="font-size:0.6rem; font-weight:800; color:var(--primary); margin-bottom:5px;">KALAN KREDİ (DK)</div>
+                    <div style="font-size:1.8rem; font-weight:800;"><span id="credit-count">60.0</span></div>
+                </div>
+            </aside>
+            <main class="workspace">
+                <div id="orig-box">Sistem hazır, dinleniyor...</div>
+                <div class="main-card">
+                    <div id="trans-text">Waiting for audio...</div>
+                </div>
+                <button class="btn btn-outline" style="margin-top:30px; color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="location.reload()">Bağlantıyı Kes</button>
+            </main>
         </div>
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div id="orig-box">Dinleniyor...</div>
-            <div class="main-trans-card"><div id="trans-text">...</div></div>
+    </section>
+
+    <section id="pricing-page" class="section" style="justify-content:center; align-items:center; padding:40px;">
+        <h1 style="font-size:3rem; margin-bottom:40px;">Planlar</h1>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; width:100%; max-width:1000px;">
+            <div style="background:var(--glass); padding:30px; border-radius:20px; text-align:center; border:1px solid var(--border);">
+                <h3>Ücretsiz</h3><div style="font-size:2rem; margin:15px 0;">0₺</div><button class="btn btn-outline" style="width:100%;">Aktif Plan</button>
+            </div>
+            <div style="background:var(--primary-soft); padding:30px; border-radius:20px; text-align:center; border:1px solid var(--primary);">
+                <h3>Pro</h3><div style="font-size:2rem; margin:15px 0;">299₺</div><button class="btn btn-primary" style="width:100%;">Yükselt</button>
+            </div>
+            <div style="background:var(--glass); padding:30px; border-radius:20px; text-align:center; border:1px solid var(--border);">
+                <h3>Business</h3><div style="font-size:2rem; margin:15px 0;">999₺</div><button class="btn btn-outline" style="width:100%;">İletişim</button>
+            </div>
         </div>
+        <button class="btn btn-outline" style="margin-top:40px; border:none;" onclick="showSection('home-page')">← Geri Dön</button>
     </section>
 
     <script>
         const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
         let recognition;
-        let lastTranscript = "";
+        let lastSent = "";
+        let micStream, screenStream, audioContext, dest;
 
+        // Navigasyon
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
+        // Ana Motor Başlatma
         async function startEngine() {
             showSection('work-page');
             const src = document.getElementById('sL').value;
             const target = document.getElementById('tL').value;
-            
             try {
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new Speech();
-                recognition.lang = src;
-                recognition.continuous = true;
-                recognition.interimResults = true;
-
-                recognition.onresult = (e) => {
-                    let currentTranscript = "";
-                    for (let i = e.resultIndex; i < e.results.length; ++i) {
-                        currentTranscript += e.results[i][0].transcript;
-                    }
-                    
-                    document.getElementById('orig-box').innerText = currentTranscript;
-
-                    // ZEKA BURADA: Eğer cümle yeterince uzunsa veya duraklama varsa gönder
-                    clearTimeout(window.sTimer);
-                    window.sTimer = setTimeout(() => {
-                        if (currentTranscript.length > 5 && currentTranscript !== lastTranscript) {
-                            socket.emit('translate-this', { text: currentTranscript, target: target });
-                            lastTranscript = currentTranscript;
-                        }
-                    }, 800); // 800ms duraklama bekler, kelime kelime çevirip kafayı yemez.
-                };
-
-                recognition.onend = () => { try { recognition.start(); } catch(e) {} };
-                recognition.start();
-            } catch(e) { alert("Mikrofon izni gerekli!"); }
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                initRecognition(src, target);
+            } catch(e) { alert("Sistemin çalışması için mikrofon izni gereklidir."); location.reload(); }
         }
 
-        socket.on('display-translation', (t) => {
-            document.getElementById('trans-text').innerText = t;
+        // Sistem Sesi Ekleme (Mixer)
+        async function toggleSystemAudio() {
+            const btn = document.getElementById('sysBtn');
+            if (!screenStream) {
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    dest = audioContext.createMediaStreamDestination();
+                    const micSource = audioContext.createMediaStreamSource(micStream);
+                    const screenSource = audioContext.createMediaStreamSource(screenStream);
+                    micSource.connect(dest);
+                    screenSource.connect(dest);
+                    btn.innerHTML = "✅ Sistem Sesi Aktif";
+                    btn.classList.add('active');
+                } catch(e) { console.error("Sistem sesi iptal edildi."); }
+            } else {
+                screenStream.getTracks().forEach(t => t.stop());
+                screenStream = null;
+                btn.innerHTML = "🖥️ Sistem Sesi Ekle";
+                btn.classList.remove('active');
+            }
+        }
+
+        // Konuşma Tanıma
+        function initRecognition(src, target) {
+            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new Speech();
+            recognition.lang = src;
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onresult = (e) => {
+                let fullText = '';
+                for (let i = e.resultIndex; i < e.results.length; ++i) {
+                    fullText += e.results[i][0].transcript;
+                }
+                
+                // Senin meşhur akıllı limitin (Çeviri hızını ve performansını korur)
+                const words = fullText.trim().split(/\s+/);
+                const focusText = words.slice(-12).join(" "); 
+                
+                document.getElementById('orig-box').innerText = focusText;
+
+                // Smart Debounce (Kelimeleri biriktirip yollar)
+                clearTimeout(window.sTimer);
+                window.sTimer = setTimeout(() => {
+                    if (focusText.length > 3 && focusText !== lastSent) {
+                        socket.emit('translate-this', { text: focusText, target: target });
+                        lastSent = focusText;
+                    }
+                }, 650);
+            };
+
+            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
+            recognition.start();
+        }
+
+        // Çeviri ve Kredi Verilerini Alma
+        socket.on('display-translation', (data) => {
+            document.getElementById('trans-text').innerText = data.text;
+            document.getElementById('credit-count').innerText = data.credits;
+        });
+
+        // Hata Mesajları (Kredi bitmesi vb.)
+        socket.on('error-msg', (msg) => { 
+            document.getElementById('trans-text').innerText = "⚠️ " + msg;
+            document.getElementById('trans-text').style.color = "#ef4444";
         });
     </script>
 </body>
