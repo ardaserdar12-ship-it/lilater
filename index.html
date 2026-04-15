@@ -125,7 +125,7 @@
     </div>
 
     <script>
-        const socket = io();
+        const socket = io(window.location.origin);
         let recognition;
         let lastSent = "";
 
