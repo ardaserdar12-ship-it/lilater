@@ -1,181 +1,43 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lilater | AI Real-time Translation Platform</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #05070a;
-            --primary: #6366f1;
-            --primary-soft: rgba(99, 102, 241, 0.1);
-            --accent: #a855f7;
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-            --glass: rgba(17, 24, 39, 0.7);
-            --border: rgba(255, 255, 255, 0.06);
-        }
+<style>
+    /* ... root ve diğer sayfaların CSS kodları aynı kalıyor ... */
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        body { background-color: var(--bg); color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    /* --- 3. WORKSPACE (DASHBOARD) --- YENİ ALTYAZI TARZI GÜNCELLEMESİ */
+    #work-page { padding: 40px; display: flex; flex-direction: column; align-items: center; }
+    
+    .nav-mini { width: 100%; max-width: 1400px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .logo-small { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
+    .status-pill { display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .rec-anim { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* UI Helpers */
-        .section { display: none; min-height: 100vh; width: 100%; transition: opacity 0.5s ease; }
-        .section.active { display: flex; flex-direction: column; animation: fadeIn 0.6s forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .workspace-grid { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; max-width: 1200px; }
+    
+    /* Üstteki Orijinal Metin (Daha sönük ve referans amaçlı) */
+    #orig-box { color: #475569; font-size: 1.1rem; margin-bottom: 40px; max-width: 800px; text-align: center; line-height: 1.4; min-height: 1.5rem; }
 
-        /* --- 1. HOMEPAGE (LANDING) --- */
-        #home-page { justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        .hero-badge { background: var(--primary-soft); color: var(--primary); padding: 8px 16px; border-radius: 100px; font-size: 0.8rem; font-weight: 700; margin-bottom: 20px; border: 1px solid rgba(99, 102, 241, 0.2); }
-        .hero-title { font-size: 4.5rem; font-weight: 800; letter-spacing: -3px; line-height: 1; margin-bottom: 20px; background: linear-gradient(to bottom, #fff 60%, #64748b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-desc { color: var(--text-dim); font-size: 1.2rem; max-width: 600px; margin-bottom: 40px; line-height: 1.6; }
-        .cta-group { display: flex; gap: 15px; }
-        .btn { padding: 16px 32px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 1rem; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); }
-        .btn-primary:hover { transform: translateY(-3px); filter: brightness(1.1); }
-        .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+    /* GÜNCELLENEN ALTYAZI KUTUSU (Yatayda geniş, daha az padding) */
+    .main-trans-card { 
+        width: 100%; 
+        max-width: 1100px; /* Fotoğraftakinden çok daha geniş */
+        background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%); 
+        padding: 30px 50px; /* Dikey padding azaltıldı, yatay korundu */
+        border-radius: 24px; /* Köşeler biraz daha keskinleştirildi */
+        border: 1px solid var(--border); 
+        text-align: center; 
+        position: relative; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5); /* Gölge hafifletildi */
+    }
 
-        /* --- 2. ONBOARDING & SETUP --- */
-        #setup-page { justify-content: center; align-items: center; background: radial-gradient(circle at top, #111827, #05070a); }
-        .setup-card { background: var(--glass); backdrop-filter: blur(30px); padding: 50px; border-radius: 35px; border: 1px solid var(--border); width: 100%; max-width: 500px; }
-        .step-indicator { display: flex; gap: 10px; margin-bottom: 30px; }
-        .step-dot { flex: 1; height: 4px; background: var(--border); border-radius: 10px; }
-        .step-dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin: 20px 0 8px 5px; }
-        select { width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 1rem; outline: none; appearance: none; cursor: pointer; }
-        select:focus { border-color: var(--primary); }
+    /* GÜNCELLENEN METİN BOYUTU (Daha küçük ve okunabilir) */
+    #trans-text { 
+        font-size: 2.2rem; /* Dev boyuttan (4rem) altyazı boyutuna indirildi */
+        font-weight: 700; 
+        line-height: 1.2; 
+        word-wrap: break-word; 
+        color: #ffffff;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Okunabilirlik için hafif gölge */
+    }
 
-        /* --- 3. WORKSPACE (DASHBOARD) --- */
-        #work-page { padding: 40px; }
-        .nav-mini { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; }
-        .logo-small { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
-        .status-pill { display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .rec-anim { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        .workspace-grid { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #orig-box { color: var(--text-dim); font-size: 1.2rem; margin-bottom: 30px; max-width: 700px; text-align: center; }
-        .main-trans-card { width: 100%; max-width: 900px; background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); padding: 60px; border-radius: 40px; border: 1px solid var(--border); text-align: center; position: relative; }
-        #trans-text { font-size: 4rem; font-weight: 800; line-height: 1.1; word-wrap: break-word; }
-
-        /* Tutorial Overlays */
-        .tutorial-hint { margin-top: 30px; color: #475569; font-size: 0.9rem; }
-    </style>
-</head>
-<body>
-
-    <section id="home-page" class="section active">
-        <div class="hero-badge">v2.0 Beta Şimdi Yayında</div>
-        <h1 class="hero-title">Sınırları Aşan <br> Canlı Çeviri.</h1>
-        <p class="hero-desc">Lilater, yayınlarınız ve toplantılarınız için gecikmesiz, profesyonel AI simültane çeviri deneyimi sunar.</p>
-        <div class="cta-group">
-            <button class="btn btn-primary" onclick="showSection('setup-page')">Hemen Başla</button>
-            <button class="btn btn-outline">Dökümantasyon</button>
-        </div>
-    </section>
-
-    <section id="setup-page" class="section">
-        <div class="setup-card">
-            <div class="step-indicator">
-                <div class="step-dot active"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-            </div>
-            <h2 style="font-size: 2rem; margin-bottom: 10px;">Yapılandırma</h2>
-            <p style="color: var(--text-dim); font-size: 0.9rem;">Çeviri motorunu başlatmadan önce tercihlerinizi belirleyin.</p>
-
-            <label>Kaynak Dil (Sizin Diliniz)</label>
-            <select id="sL">
-                <option value="tr-TR">Türkçe (Türkiye)</option>
-                <option value="en-US">English (US)</option>
-                <option value="de-DE">Deutsch (Germany)</option>
-            </select>
-
-            <label>Hedef Dil (Çeviri)</label>
-            <select id="tL">
-                <option value="İngilizce">İngilizce</option>
-                <option value="Türkçe">Türkçe</option>
-                <option value="Almanca">Almanca</option>
-                <option value="Fransızca">Fransızca</option>
-            </select>
-
-            <button class="btn btn-primary" style="width: 100%; margin-top: 30px;" onclick="startEngine()">Çalışma Alanını Aç</button>
-        </div>
-    </section>
-
-    <section id="work-page" class="section">
-        <div class="nav-mini">
-            <div class="logo-small">Lilater<span style="color: var(--primary);">.</span></div>
-            <div class="status-pill">
-                <div class="rec-anim"></div>
-                SİSTEM AKTİF
-            </div>
-            <button class="btn btn-outline" style="padding: 10px 20px; font-size: 0.8rem;" onclick="location.reload()">Bağlantıyı Kes</button>
-        </div>
-
-        <div class="workspace-grid">
-            <div id="orig-box">Ses motoru başlatılıyor, lütfen konuşun...</div>
-            <div class="main-trans-card">
-                <div id="trans-text">Waiting...</div>
-            </div>
-            <p class="tutorial-hint">İpucu: En iyi sonuç için mikrofonunuza yakın ve net konuşun.</p>
-        </div>
-    </section>
-
-    <script>
-        const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
-        let recognition;
-        let lastSent = "";
-
-        // Navigation Controller
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function startEngine() {
-            showSection('work-page');
-            const src = document.getElementById('sL').value;
-            const target = document.getElementById('tL').value;
-            
-            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!Speech) return alert("Hata: Tarayıcı desteklenmiyor.");
-
-            recognition = new Speech();
-            recognition.lang = src;
-            recognition.continuous = true;
-            recognition.interimResults = true;
-
-            recognition.onresult = (e) => {
-                let full = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    full += e.results[i][0].transcript;
-                }
-                const words = full.trim().split(/\s+/);
-                const focusText = words.slice(-12).join(" "); // Senin meşhur akıllı limitin
-                
-                document.getElementById('orig-box').innerText = focusText;
-
-                clearTimeout(window.sTimer);
-                window.sTimer = setTimeout(() => {
-                    if (focusText.length > 3 && focusText !== lastSent) {
-                        socket.emit('translate-this', { text: focusText, target: target });
-                        lastSent = focusText;
-                    }
-                }, 500);
-            };
-
-            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
-            recognition.start();
-        }
-
-        socket.on('display-translation', (t) => {
-            document.getElementById('trans-text').innerText = t;
-        });
-    </script>
-</body>
-</html>
+    /* Tutorial Overlays */
+    .tutorial-hint { margin-top: 40px; color: #334155; font-size: 0.85rem; text-align: center;}
+</style>
