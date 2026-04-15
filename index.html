@@ -137,40 +137,77 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function startEngine() {
+        // GÜNCELLENEN FONKSİYON: Mikrofon + Sistem Sesi Hibrit Desteği
+        async function startEngine() {
             showSection('work-page');
             const src = document.getElementById('sL').value;
             const target = document.getElementById('tL').value;
             
-            const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!Speech) return alert("Hata: Tarayıcı desteklenmiyor.");
-
-            recognition = new Speech();
-            recognition.lang = src;
-            recognition.continuous = true;
-            recognition.interimResults = true;
-
-            recognition.onresult = (e) => {
-                let full = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    full += e.results[i][0].transcript;
-                }
-                const words = full.trim().split(/\s+/);
-                const focusText = words.slice(-12).join(" "); // Senin meşhur akıllı limitin
-                
-                document.getElementById('orig-box').innerText = focusText;
-
-                clearTimeout(window.sTimer);
-                window.sTimer = setTimeout(() => {
-                    if (focusText.length > 3 && focusText !== lastSent) {
-                        socket.emit('translate-this', { text: focusText, target: target });
-                        lastSent = focusText;
+            try {
+                // 1. Sistem Sesini Al (Kullanıcı 'Sistem sesini paylaş' demeli)
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true, // Paylaşım penceresi için gerekli
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
                     }
-                }, 500);
-            };
+                });
 
-            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
-            recognition.start();
+                // 2. Mikrofon Sesini Al
+                const micStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+
+                // 3. AudioContext ile sesleri dijital olarak birleştir (Mix)
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const dest = audioContext.createMediaStreamDestination();
+                
+                const micSource = audioContext.createMediaStreamSource(micStream);
+                const screenSource = audioContext.createMediaStreamSource(screenStream);
+                
+                micSource.connect(dest);
+                screenSource.connect(dest);
+
+                // 4. Ses Tanıma Motorunu Başlat
+                const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!Speech) return alert("Hata: Tarayıcı desteklenmiyor.");
+
+                recognition = new Speech();
+                recognition.lang = src;
+                recognition.continuous = true;
+                recognition.interimResults = true;
+
+                recognition.onresult = (e) => {
+                    let full = '';
+                    for (let i = e.resultIndex; i < e.results.length; ++i) {
+                        full += e.results[i][0].transcript;
+                    }
+                    const words = full.trim().split(/\s+/);
+                    const focusText = words.slice(-12).join(" ");
+                    
+                    document.getElementById('orig-box').innerText = focusText;
+
+                    clearTimeout(window.sTimer);
+                    window.sTimer = setTimeout(() => {
+                        if (focusText.length > 3 && focusText !== lastSent) {
+                            socket.emit('translate-this', { text: focusText, target: target });
+                            lastSent = focusText;
+                        }
+                    }, 500);
+                };
+
+                recognition.onend = () => { try { recognition.start(); } catch(e) {} };
+                recognition.start();
+
+            } catch (err) {
+                console.error("Ses erişim hatası:", err);
+                alert("Önemli: Sistem sesini çevirebilmek için ekran paylaşımı izni vermeli ve 'Sistem sesini paylaş' kutucuğunu işaretlemelisiniz.");
+                location.reload();
+            }
         }
 
         socket.on('display-translation', (t) => {
