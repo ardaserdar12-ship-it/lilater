@@ -42,25 +42,26 @@
         label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin: 20px 0 8px 5px; }
         select { width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 1rem; outline: none; appearance: none; cursor: pointer; }
 
-        /* --- WORKSPACE --- */
-        #work-page { padding: 40px; }
-        .nav-mini { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; }
-        .logo-small { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
+        /* --- WORKSPACE (DASHBOARD) --- */
+        #work-page { padding: 20px; display: flex; flex-direction: column; background: radial-gradient(circle at center, #0a0c14 0%, #010205 100%); }
+        .nav-mini { width: 100%; max-width: 1400px; margin: 0 auto 30px auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); }
+        .logo-small { font-weight: 800; font-size: 1.6rem; letter-spacing: -1.5px; background: linear-gradient(to right, #fff, var(--text-dim)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        .controls-right { display: flex; gap: 15px; align-items: center; }
-        .btn-audio-toggle { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-audio-toggle.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+        .controls-right { display: flex; gap: 12px; align-items: center; }
+        .btn-audio-toggle { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid var(--border); padding: 10px 20px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-audio-toggle.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 15px var(--primary-soft); }
         
-        .status-pill { display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2); }
-        .rec-anim { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .status-pill { display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.05); color: #10b981; padding: 8px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.1); }
+        .rec-anim { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; box-shadow: 0 0 10px #10b981; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .workspace-grid { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #orig-box { color: var(--text-dim); font-size: 1.2rem; margin-bottom: 30px; max-width: 700px; text-align: center; }
-        .main-trans-card { width: 100%; max-width: 900px; background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); padding: 60px; border-radius: 40px; border: 1px solid var(--border); text-align: center; }
-        #trans-text { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
+        .workspace-grid { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; }
+        #orig-box { color: #475569; font-size: 1.1rem; margin-bottom: 30px; max-width: 800px; text-align: center; opacity: 0.8; }
+        .main-trans-card { width: 100%; max-width: 1000px; background: linear-gradient(180deg, rgba(10, 12, 20, 0.9) 0%, rgba(1, 2, 5, 0.95) 100%); padding: 50px 70px; border-radius: 28px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); position: relative; }
+        .main-trans-card::before { content: ''; position: absolute; top: 0; left: 10%; width: 80%; height: 1px; background: linear-gradient(to right, transparent, var(--primary), transparent); opacity: 0.5; }
+        #trans-text { font-size: 2.8rem; font-weight: 800; line-height: 1.2; word-wrap: break-word; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
-        .tutorial-hint { margin-top: 30px; color: #475569; font-size: 0.9rem; }
+        .tutorial-hint { margin-top: 40px; color: #334155; font-size: 0.85rem; background: rgba(255,255,255,0.02); padding: 8px 20px; border-radius: 100px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -91,6 +92,7 @@
                 <option value="İngilizce">İngilizce</option>
                 <option value="Türkçe">Türkçe</option>
                 <option value="Almanca">Almanca</option>
+                <option value="Fransızca">Fransızca</option>
             </select>
 
             <button class="btn btn-primary" style="width: 100%; margin-top: 30px;" onclick="startEngine()">Çalışma Alanını Aç</button>
@@ -106,14 +108,14 @@
                     <div class="rec-anim"></div>
                     SİSTEM AKTİF
                 </div>
-                <button class="btn btn-outline" style="padding: 10px 20px; font-size: 0.8rem;" onclick="location.reload()">Çıkış</button>
+                <button class="btn btn-outline" style="padding: 10px 20px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="location.reload()">Çıkış</button>
             </div>
         </div>
 
         <div class="workspace-grid">
             <div id="orig-box">Ses motoru hazır, dinleniyor...</div>
             <div class="main-trans-card">
-                <div id="trans-text">Waiting...</div>
+                <div id="trans-text">Waiting for speech...</div>
             </div>
             <p class="tutorial-hint">İpucu: Sistem sesini dahil etmek için sağ üstteki butonu kullanın.</p>
         </div>
@@ -125,30 +127,18 @@
         let lastSent = "";
         let micStream, screenStream, audioContext, dest;
 
+        // Sayfalar arası geçiş fonksiyonu (Dışarıda tanımlandı)
         function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-       
-        // Navigasyon Kontrolcüsü: Sayfalar arası geçişi sağlar
-function showSection(id) {
-    // Tüm section'ları bul ve 'active' class'ını kaldır
-    document.querySelectorAll('.section').forEach(s => {
-        s.classList.remove('active');
-    });
-    
-    // Sadece istenen section'a 'active' class'ını ekle
-    const targetSection = document.getElementById(id);
-    if (targetSection) {
-        targetSection.classList.add('active');
-    } else {
-        console.error("Hata: " + id + " id'li bölüm bulunamadı!");
-    }
-}
-        
-        
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+            });
+            const targetSection = document.getElementById(id);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
         }
 
-        // Ana Motor Başlatma (Sadece Mikrofon ile başlar)
+        // Ana Motor Başlatma
         async function startEngine() {
             showSection('work-page');
             const src = document.getElementById('sL').value;
@@ -163,38 +153,21 @@ function showSection(id) {
             }
         }
 
-        // Sistem Sesini Açıp Kapatan Fonksiyon
         async function toggleSystemAudio() {
             const btn = document.getElementById('systemAudioBtn');
-            
             if (!screenStream) {
                 try {
-                    screenStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: true,
-                        audio: true
-                    });
-
-                    // AudioContext ile sesleri birleştir
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     dest = audioContext.createMediaStreamDestination();
-                    
                     const micSource = audioContext.createMediaStreamSource(micStream);
                     const screenSource = audioContext.createMediaStreamSource(screenStream);
-                    
                     micSource.connect(dest);
                     screenSource.connect(dest);
-
                     btn.innerHTML = "✅ Sistem Sesi Aktif";
                     btn.classList.add('active');
-                    
-                    // Recognition'ı yeni stream ile güncelle (isteğe bağlı, genelde Speech API varsayılan cihazı kullanır ama bu işlem stream'i canlı tutar)
-                    console.log("Sistem sesi miksajı yapıldı.");
-
-                } catch (err) {
-                    console.error("Sistem sesi alınamadı.");
-                }
+                } catch (err) { console.error("Sistem sesi alınamadı."); }
             } else {
-                // Kapatma işlemi
                 screenStream.getTracks().forEach(t => t.stop());
                 screenStream = null;
                 btn.innerHTML = "🖥️ Sistem Sesi Ekle";
@@ -220,14 +193,14 @@ function showSection(id) {
 
                 clearTimeout(window.sTimer);
                 window.sTimer = setTimeout(() => {
-                    if (focusText.length > 3 && focusText !== lastSent) {
+                    if (focusText.length > 2 && focusText !== lastSent) {
                         socket.emit('translate-this', { text: focusText, target: target });
                         lastSent = focusText;
                     }
-                }, 500);
+                }, 250); // Daha hızlı tepki için 250ms'ye indirildi
             };
 
-            recognition.onend = () => { recognition.start(); };
+            recognition.onend = () => { try { recognition.start(); } catch(e) {} };
             recognition.start();
         }
 
