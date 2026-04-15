@@ -120,29 +120,55 @@
     </section>
 
     <script>
-        const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
-        let recognition;
-        let lastSent = "";
-        let micStream, screenStream, audioContext, dest;
+        let currentRoomId = "default-room"; // Şimdilik sabit, ilerde URL'den alacağız
+let myName = "";
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+async function startEngine() {
+    myName = prompt("Lütfen adınızı girin:") || "Anonim";
+    showSection('work-page');
+    
+    const src = document.getElementById('sL').value;
+    const target = document.getElementById('tL').value;
 
-        // Ana Motor Başlatma (Sadece Mikrofon ile başlar)
-        async function startEngine() {
-            showSection('work-page');
-            const src = document.getElementById('sL').value;
-            const target = document.getElementById('tL').value;
-            
-            try {
-                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                initRecognition(src, target);
-            } catch (err) {
-                alert("Mikrofon izni gerekli!");
-                location.reload();
+    // Odaya katılma isteği gönder
+    socket.emit('join-room', {
+        roomId: currentRoomId,
+        userName: myName,
+        targetLang: target
+    });
+
+    // ... (Mikrofon ve SpeechRecognition izinleri aynı kalıyor)
+
+    recognition.onresult = (e) => {
+        // ... (focusText belirleme mantığı aynı)
+        
+        clearTimeout(window.sTimer);
+        window.sTimer = setTimeout(() => {
+            if (focusText.length > 2 && focusText !== lastSent) {
+                // Sunucuya odayı ve ismimizi de gönderiyoruz
+                socket.emit('translate-this', { 
+                    text: focusText, 
+                    roomId: currentRoomId,
+                    senderName: myName
+                });
+                lastSent = focusText;
             }
+        }, 250);
+    };
+    // ...
+}
+
+// Çeviri Geldiğinde Speaker Etiketiyle Göster
+socket.on('display-translation', (data) => {
+    // data.speaker -> Kimin konuştuğu
+    // data.text -> Çeviri
+    document.getElementById('trans-text').innerHTML = `
+        <span style="font-size: 0.8rem; color: var(--primary); display: block; margin-bottom: 5px;">
+            ${data.speaker} konuşuyor...
+        </span>
+        ${data.text}
+    `;
+});
         }
 
         // Sistem Sesini Açıp Kapatan Fonksiyon
