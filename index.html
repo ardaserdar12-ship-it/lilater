@@ -128,6 +128,24 @@
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+       
+        // Navigasyon Kontrolcüsü: Sayfalar arası geçişi sağlar
+function showSection(id) {
+    // Tüm section'ları bul ve 'active' class'ını kaldır
+    document.querySelectorAll('.section').forEach(s => {
+        s.classList.remove('active');
+    });
+    
+    // Sadece istenen section'a 'active' class'ını ekle
+    const targetSection = document.getElementById(id);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    } else {
+        console.error("Hata: " + id + " id'li bölüm bulunamadı!");
+    }
+}
+        
+        
         }
 
         // Ana Motor Başlatma (Sadece Mikrofon ile başlar)
