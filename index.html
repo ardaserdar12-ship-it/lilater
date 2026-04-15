@@ -7,6 +7,25 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+
+        .summary-box {
+    position: absolute;
+    top: 100px;
+    right: 40px;
+    width: 250px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: 0.5s;
+    pointer-events: none;
+}
+.summary-box.active { opacity: 1; transform: translateY(-10px); }
+.summary-title { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; }
+.summary-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; }
+        
         :root {
             --bg: #020408; /* Derin Siyah Arka Plan */
             --primary: #6366f1;
@@ -206,6 +225,17 @@
             <button class="btn btn-outline" style="color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="location.reload()">Sistemi Kapat</button>
         </aside>
         <main class="main-space">
+<main class="main-space">
+    <div id="summary-container" class="summary-box">
+        <div class="summary-title">📍 Şu Anki Konu</div>
+        <div id="summary-text" class="summary-text">Konuşma özetleniyor...</div>
+    </div>
+    
+    <div id="visualizer" class="visualizer">...</div>
+ 
+
+
+            
             <div id="visualizer" class="visualizer">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
             </div>
