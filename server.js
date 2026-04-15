@@ -4,63 +4,50 @@ import { Server } from 'socket.io';
 import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
+// Yapılandırma
+dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const httpServer = createServer(app);
 
-// GÜNCELLEME: Render/Canlı ortam için Socket.io ayarları
 const io = new Server(httpServer, {
     cors: {
-        origin: "*", // Dışarıdan gelen bağlantılara izin ver
+        origin: "*",
         methods: ["GET", "POST"]
     },
-    transports: ['websocket', 'polling'] // Bağlantı tipini garantiye al
+    transports: ['websocket', 'polling']
 });
 
-// LILATER API ANAHTARI
 const openai = new OpenAI({
-    // GÜNCELLEME: Güvenlik için Environment Variable kullanıyoruz
     apiKey: process.env.OPENAI_API_KEY 
 });
 
-// Statik dosyaları (index.html vb.) doğru bulması için
+// SaaS Kullanıcı Simülasyonu (Database bağlanana kadar kredi takibi yapar)
+let userDB = {
+    credits: 120.0, // Başlangıç kredisi (dakika)
+    plan: "Free",
+    id: "user_launch_v1"
+};
+
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// --- SOCKET ENGINE ---
 io.on('connection', (socket) => {
-    console.log('Lilater: Yayına hazır bağlantı kuruldu. ID:', socket.id);
+    console.log('✅ Lilater SaaS: Yeni bağlantı kuruldu. ID:', socket.id);
 
+    // 1. ANA ÇEVİRİ MOTORU
     socket.on('translate-this', async (data) => {
-      
-        // server.js içindeki socket.on('translate-this', ...) altına ekle:
+        // Kredi Kontrolü
+        if (userDB.credits <= 0) {
+            return socket.emit('error-msg', 'Krediniz tükenmiştir. Lütfen planınızı yükseltin.');
+        }
 
-socket.on('summarize-this', async (data) => {
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                { 
-                    role: "system", 
-                    content: "Sen bir asistansın. Verilen konuşma geçmişine bakarak, şu an hangi konudan bahsedildiğini çok kısa (en fazla 10 kelime) ve profesyonel bir şekilde özetle." 
-                },
-                { role: "user", content: "Konuşma geçmişi: " + data.fullText }
-            ],
-            temperature: 0.5,
-        });
-
-        socket.emit('display-summary', {
-            summary: response.choices[0].message.content
-        });
-    } catch (e) {
-        console.error("Özetleme Hatası:", e.message);
-    }
-});
-        
-        
         if (!data.text || data.text.length < 3) return;
 
         try {
@@ -68,39 +55,75 @@ socket.on('summarize-this', async (data) => {
                 model: "gpt-4o-mini",
                 messages: [
                     { 
-                       role: "system", 
-        content: `You are a high-performance, real-time simultaneous translator for the Lilater SaaS platform.
-        
-        TASK:
-        Translate the incoming text immediately and accurately into ${data.target}.
-        
-        CRITICAL RULES:
-        1. NO explanations or pre-text. Output ONLY the translated text.
-        2. Use natural, idiomatic phrasing in the target language (avoid literal, word-for-word translations).
-        3. Maintain the tone and context of the speaker.
-        4. If the input is a sentence fragment, provide the most plausible translation based on common speech patterns.
-        5. Handle Turkish-specific idioms by providing their cultural equivalents in ${data.target}.`
+                        role: "system", 
+                        content: `You are a professional real-time simultaneous translator for Lilater SaaS.
+                        - Target Language: ${data.target}
+                        - Rules: NO preamble, NO explanations. Output ONLY the natural translation.
+                        - Context: Professional meeting/stream. Use idiomatic and natural phrasing.`
                     },
                     { role: "user", content: data.text }
                 ],
                 temperature: 0.3 
             });
 
+            // Kredi Düşümü (Her çeviri isteğinde 0.1 dakika/birim düşer)
+            userDB.credits -= 0.1;
+            const updatedCredits = userDB.credits > 0 ? userDB.credits.toFixed(1) : "0.0";
+
             const translatedText = response.choices[0].message.content;
-            socket.emit('display-translation', translatedText);
-            console.log(`[${data.target}] >> ${translatedText}`);
+            
+            // Hem çeviriyi hem güncel krediyi gönderiyoruz
+            socket.emit('display-translation', {
+                text: translatedText,
+                credits: updatedCredits
+            });
+
+            console.log(`[${data.target}] Translation Successful. Remaining: ${updatedCredits}`);
         } catch (error) {
-            console.error("OpenAI Hatası:", error.message);
+            console.error("OpenAI Çeviri Hatası:", error.message);
+            socket.emit('error-msg', 'Çeviri motoru şu an meşgul.');
+        }
+    });
+
+    // 2. KONU ÖZETLEME MOTORU (Sessizlik anında tetiklenir)
+    socket.on('summarize-this', async (data) => {
+        if (!data.fullText || data.fullText.length < 50) return;
+
+        try {
+            console.log("📍 Konu özeti oluşturuluyor...");
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "Sen bir toplantı asistanısın. Verilen metni analiz et ve şu an konuşulan ana konuyu profesyonel, kısa (maksimum 10 kelime) bir başlık/cümle olarak özetle." 
+                    },
+                    { role: "user", content: "Metin: " + data.fullText }
+                ],
+                temperature: 0.5,
+            });
+
+            socket.emit('display-summary', {
+                summary: response.choices[0].message.content
+            });
+        } catch (e) {
+            console.error("Özetleme Hatası:", e.message);
         }
     });
 
     socket.on('disconnect', () => {
-        console.log('Lilater: Kullanıcı ayrıldı.');
+        console.log('❌ Lilater: Kullanıcı ayrıldı.');
     });
 });
 
-// GÜNCELLEME: Render'ın atadığı portu kullan ve 0.0.0.0 üzerinden dinle
+// Sunucuyu Başlat
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Lilater Yayında! Port: ${PORT}`);
+    console.log(`
+    🚀 ==========================================
+    🚀 LILATER PRE-LAUNCH ENGINE READY
+    🚀 Port: ${PORT}
+    🚀 Mode: SaaS Performance Enabled
+    🚀 ==========================================
+    `);
 });
