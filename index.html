@@ -7,27 +7,8 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-
-        .summary-box {
-    position: absolute;
-    top: 100px;
-    right: 40px;
-    width: 250px;
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid var(--border);
-    padding: 20px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transition: 0.5s;
-    pointer-events: none;
-}
-.summary-box.active { opacity: 1; transform: translateY(-10px); }
-.summary-title { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; }
-.summary-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; }
-        
         :root {
-            --bg: #020408; /* Derin Siyah Arka Plan */
+            --bg: #020408;
             --primary: #6366f1;
             --primary-soft: rgba(99, 102, 241, 0.15);
             --accent: #a855f7;
@@ -38,41 +19,73 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-       body { 
-    background: 
-        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
-        linear-gradient(135deg, #020408 0%, #050816 40%, #020408 100%);
         
-    color: var(--text-main); 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    overflow-x: hidden;
-}
+        body { 
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+                linear-gradient(135deg, #020408 0%, #050816 40%, #020408 100%);
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-        /* Navigasyon Mantığı */
+        /* --- ÖZET KUTUSU STİLİ --- */
+        .summary-box {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 280px;
+            background: var(--glass);
+            border: 1px solid var(--primary);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateX(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .summary-box.active { opacity: 1; transform: translateX(0); }
+        .summary-title { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .summary-text { font-size: 0.85rem; color: var(--text-main); line-height: 1.5; font-weight: 500; }
+
+        /* Navigasyon & Bölümler */
         .section { display: none; min-height: 100vh; width: 100%; transition: opacity 0.5s ease; position: relative; }
         .section.active { display: flex; flex-direction: column; animation: fadeIn 0.6s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- LANDING --- */
         nav { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 30px 20px; z-index: 100; }
         .logo { font-weight: 800; font-size: 1.8rem; letter-spacing: -1.5px; cursor: pointer; color: #fff; }
         .nav-links { display: flex; gap: 30px; }
         .nav-links a { color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
         .nav-links a:hover { color: var(--primary); }
 
-        .hero { text-align: center; margin-top: 80px; padding: 0 20px; z-index: 10; }
+        .hero { text-align: center; margin-top: 80px; padding: 0 20px; z-index: 10; position: relative; }
         .hero-title { font-size: 5.5rem; font-weight: 800; letter-spacing: -4px; line-height: 1; margin-bottom: 25px; background: linear-gradient(to bottom, #fff 60%, #475569); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero-desc { color: var(--text-dim); font-size: 1.3rem; max-width: 650px; margin: 0 auto 40px auto; line-height: 1.6; }
 
-        /* --- BUTONLAR --- */
+        /* Butonlar */
         .btn { padding: 16px 32px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; border: none; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); }
         .btn-primary:hover { transform: translateY(-3px); }
         .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
         .btn-outline:hover { background: rgba(255,255,255,0.05); }
 
-        /* --- SES DALGASI (VISUALIZER) --- */
+        /* --- DASHBOARD --- */
+        #work-page { flex-direction: row; }
+        .sidebar { width: 300px; background: #010204; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 40px; justify-content: space-between; }
+        .main-space { flex: 1; display: flex; flex-direction: column; padding: 40px; align-items: center; justify-content: center; position: relative; }
+        .credit-badge { background: var(--primary-soft); padding: 20px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; }
+        
+        .main-trans-card { width: 100%; max-width: 900px; background: var(--glass); padding: 70px; border-radius: 40px; border: 1px solid var(--border); text-align: center; backdrop-filter: blur(20px); box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
+        #trans-text { font-size: 3rem; font-weight: 800; line-height: 1.1; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #orig-box { color: var(--text-dim); margin-bottom: 20px; font-size: 1.2rem; min-height: 1.5rem; text-align: center; }
+
+        /* Visualizer */
         .visualizer { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 25px; height: 40px; }
         .visualizer .bar { width: 4px; height: 8px; background: var(--primary); border-radius: 10px; transition: 0.15s; opacity: 0.3; }
         .visualizer.active .bar { opacity: 1; animation: wave 1s infinite ease-in-out; }
@@ -83,64 +96,16 @@
         .visualizer.active .bar:nth-child(5) { animation-delay: 0.4s; }
         @keyframes wave { 0%, 100% { height: 8px; } 50% { height: 40px; } }
 
-        /* --- DASHBOARD --- */
-        #work-page { flex-direction: row; }
-        .sidebar { width: 300px; background: #010204; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 40px; justify-content: space-between; }
-        .main-space { flex: 1; display: flex; flex-direction: column; padding: 40px; align-items: center; justify-content: center; }
-        .credit-badge { background: var(--primary-soft); padding: 20px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; }
-        
-        .main-trans-card { width: 100%; max-width: 900px; background: var(--glass); padding: 70px; border-radius: 40px; border: 1px solid var(--border); text-align: center; backdrop-filter: blur(20px); box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
-        #trans-text { font-size: 3rem; font-weight: 800; line-height: 1.1; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        #orig-box { color: var(--text-dim); margin-bottom: 20px; font-size: 1.2rem; }
-
-        /* Fiyatlandırma Kartları */
+        /* Grid & Bayraklar */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1100px; margin: 50px auto; width: 90%; }
         .card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); text-align: center; }
-        .card.pro { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); transform: scale(1.05); }
-
-        /* Yüzen Bayraklar */
         .flag-bg { position: absolute; font-size: 2rem; opacity: 0.08; pointer-events: none; z-index: 1; animation: float 10s infinite alternate; }
         @keyframes float { from { transform: translate(0,0); } to { transform: translate(20px, 20px); } }
 
-        .wave-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 120px;
-    overflow: hidden;
-    z-index: 2;
-    opacity: 0.4;
-}
-
-.wave {
-    position: absolute;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(99, 102, 241, 0.4),
-        rgba(168, 85, 247, 0.4),
-        transparent
-    );
-    filter: blur(20px);
-    animation: waveMove 6s linear infinite;
-}
-
-@keyframes waveMove {
-    0% {
-        transform: translateX(0) translateY(0);
-    }
-    50% {
-        transform: translateX(-25%) translateY(-10px);
-    }
-    100% {
-        transform: translateX(-50%) translateY(0);
-    }
-}
-    
-    
+        /* Alt Dalga Animasyonu */
+        .wave-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; overflow: hidden; z-index: 2; opacity: 0.4; pointer-events: none; }
+        .wave { position: absolute; width: 200%; height: 100%; background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4), transparent); filter: blur(20px); animation: waveMove 6s linear infinite; }
+        @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     </style>
 </head>
 <body>
@@ -164,35 +129,29 @@
             <div style="display: flex; gap: 20px; justify-content: center;">
                 <button class="btn btn-primary" onclick="showSection('setup-page')">Ücretsiz Başlayın</button>
                 <button class="btn btn-outline" onclick="showSection('features-page')">Özellikleri Keşfet</button>
-            <div class="wave-container">
-    <div class="wave"></div>
-</div>
-            
             </div>
+        </div>
+        <div class="wave-container">
+            <div class="wave"></div>
         </div>
     </section>
 
     <section id="features-page" class="section">
-        <div style="text-align:center; margin-top:80px;">
-            <h2 style="font-size:3rem; margin-bottom:15px;">Neden Lilater?</h2>
-            <p style="color:var(--text-dim)">Teknoloji ve çevirinin mükemmel uyumu.</p>
-        </div>
+        <div style="text-align:center; margin-top:80px;"><h2 style="font-size:3rem; margin-bottom:15px;">Neden Lilater?</h2></div>
         <div class="grid">
-            <div class="card"><h3>⚡ Ultra Hız</h3><p>200ms tepki süresi ile simültane deneyimi.</p></div>
-            <div class="card"><h3>🎙️ Ses Kalitesi</h3><p>AI destekli gürültü engelleme ve netleştirme.</p></div>
-            <div class="card"><h3>🖥️ Sistem Sesi</h3><p>Cihazınızdaki her sesi anında yakalayıp çevirebilirsiniz.</p></div>
+            <div class="card"><h3>⚡ Ultra Hız</h3><p>200ms tepki süresi.</p></div>
+            <div class="card"><h3>🎙️ Ses Kalitesi</h3><p>AI Destekli netleştirme.</p></div>
+            <div class="card"><h3>🖥️ Sistem Sesi</h3><p>Cihaz seslerini yakalayın.</p></div>
         </div>
         <button class="btn btn-outline" style="margin: 0 auto;" onclick="showSection('home-page')">← Geri Dön</button>
     </section>
 
     <section id="pricing-page" class="section">
-        <div style="text-align:center; margin-top:80px;">
-            <h2 style="font-size:3rem; margin-bottom:15px;">Fiyatlandırma</h2>
-        </div>
+        <div style="text-align:center; margin-top:80px;"><h2 style="font-size:3rem; margin-bottom:15px;">Fiyatlandırma</h2></div>
         <div class="grid">
-            <div class="card"><h3>Ücretsiz</h3><p>60 Dakika / Ay</p><button class="btn btn-outline" style="width:100%; margin-top:20px;">Aktif</button></div>
-            <div class="card pro"><h3>Pro</h3><p>Sınırsız Çeviri</p><button class="btn btn-primary" style="width:100%; margin-top:20px;">Satın Al</button></div>
-            <div class="card"><h3>Business</h3><p>API Erişimi</p><button class="btn btn-outline" style="width:100%; margin-top:20px;">İletişim</button></div>
+            <div class="card"><h3>Ücretsiz</h3><p>60 Dakika / Ay</p></div>
+            <div class="card pro"><h3>Pro</h3><p>Sınırsız Çeviri</p></div>
+            <div class="card"><h3>Business</h3><p>API Erişimi</p></div>
         </div>
         <button class="btn btn-outline" style="margin: 0 auto;" onclick="showSection('home-page')">← Geri Dön</button>
     </section>
@@ -224,22 +183,19 @@
             </div>
             <button class="btn btn-outline" style="color:#ef4444; border-color:rgba(239,68,68,0.2);" onclick="location.reload()">Sistemi Kapat</button>
         </aside>
+        
         <main class="main-space">
-<main class="main-space">
-    <div id="summary-container" class="summary-box">
-        <div class="summary-title">📍 Şu Anki Konu</div>
-        <div id="summary-text" class="summary-text">Konuşma özetleniyor...</div>
-    </div>
-    
-    <div id="visualizer" class="visualizer">...</div>
- 
+            <div id="summary-container" class="summary-box">
+                <div class="summary-title">📍 Şu Anki Konu</div>
+                <div id="summary-text" class="summary-text">Konuşma özetleniyor...</div>
+            </div>
 
-
-            
             <div id="visualizer" class="visualizer">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
             </div>
+
             <div id="orig-box">Ses motoru hazır, dinleniyor...</div>
+            
             <div class="main-trans-card">
                 <div id="trans-text">Waiting for audio...</div>
             </div>
@@ -250,6 +206,8 @@
         const socket = io(window.location.origin, { transports: ['websocket', 'polling'] });
         let recognition;
         let lastTranscript = "";
+        let fullTranscript = ""; // Özetleme için tüm metni biriktirir
+        let silenceTimer; // Sessizlik sayacı
         let micStream, screenStream, audioContext, dest, waveTimer;
 
         function showSection(id) {
@@ -290,18 +248,31 @@
         function initRecognition(src, target) {
             const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new Speech();
-            recognition.lang = src; recognition.continuous = true; recognition.interimResults = true;
+            recognition.lang = src; 
+            recognition.continuous = true; 
+            recognition.interimResults = true;
 
             recognition.onresult = (e) => {
                 let transcript = "";
                 for (let i = e.resultIndex; i < e.results.length; ++i) { transcript += e.results[i][0].transcript; }
                 
-                // Senin özel "slice(-12)" mantığınla hızı koruyoruz
+                // Buffer'a ekle ve özet kutusunu gizle
+                fullTranscript += " " + transcript;
+                document.getElementById('summary-container').classList.remove('active');
+
+                // SESSİZLİK KONTROLÜ (30 Saniye)
+                clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => {
+                    if (fullTranscript.trim().length > 20) {
+                        socket.emit('summarize-this', { fullText: fullTranscript });
+                    }
+                }, 30000);
+
                 const words = transcript.trim().split(/\s+/);
                 const focusText = words.slice(-12).join(" ");
                 document.getElementById('orig-box').innerText = focusText;
 
-                // SES DALGASINI TETİKLE
+                // Visualizer Animasyonu
                 const viz = document.getElementById('visualizer');
                 viz.classList.add('active');
                 clearTimeout(waveTimer);
@@ -320,6 +291,13 @@
         }
 
         socket.on('display-translation', (t) => { document.getElementById('trans-text').innerText = t; });
+
+        socket.on('display-summary', (data) => {
+            const text = document.getElementById('summary-text');
+            const container = document.getElementById('summary-container');
+            text.innerText = data.summary;
+            container.classList.add('active');
+        });
     </script>
 </body>
 </html>
