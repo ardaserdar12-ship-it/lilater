@@ -55,6 +55,7 @@ socket.on('translate-this', async (data) => {
 // ...
 });
 
-httpServer.listen(3000, () => {
-    console.log(`Lilater Aktif! http://localhost:3000 adresini aç.`);
+const PORT = process.env.PORT || 3000;
+httpServer.listen(PORT, () => {
+    console.log(`Lilater yayında! Port: ${PORT}`);
 });
